@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة الاستثمار المتقدمة</title>
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.3s;
+        }
+        .fade-enter, .fade-leave-to {
+            opacity: 0;
+        }
+        canvas {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100" x-data="{
+    annualReturn: 8,
+    dividendYield: 3,
+    initialAmount: 0,
+    monthlyAmount: 1000,
+    reinvestDividends: true,
+    reinvestPercentage: 100,
+    years: 10,
+    targetMonthly: 1000,
+    chart: null,
+    yearsToTarget: null,
+    loading: false,
+    
+    init() {
+        this.updateChart();
+    },
+    
+    get projection() {
+        return this.computeProjection(this.years);
+    },
+
+    get projectionWithoutReinvest() {
+        return this.computeProjection(this.years, false);
+    },
+
+    computeProjection(years, reinvest = true) {
+        let total = Number(this.initialAmount);
+        let totalBeforeDividend = Number(this.initialAmount);
+        let totalSavings = Number(this.initialAmount)
+        const monthly = Number(this.monthlyAmount);
+        const annualReturn = Number(this.annualReturn) / 100;
+        const dividendYield = Number(this.dividendYield) / 100;
+        
+        const projection = [];
+        let totalDividends = 0;
+
+        for(let year = 1; year <= years; year++) {
+            for(let month = 1; month <= 12; month++) {
+                total += monthly;
+                total *= 1 + (annualReturn / 12);
+                totalBeforeDividend += monthly;
+                totalSavings += monthly;
+                totalBeforeDividend *= 1 + (annualReturn / 12);
+            }
+            
+            const dividends = total * dividendYield;
+            const dividendsYield =  total * dividendYield;
+            totalDividends += dividends;
+            
+            if(reinvest && this.reinvestDividends) {
+                const reinvestAmount = dividends * (this.reinvestPercentage / 100);
+                
+                total += reinvestAmount;
+                totalDividends -= reinvestAmount;
+            }
+
+            projection.push({
+                year,
+                totalSavings:Math.round(totalSavings),
+                totalBeforeDividend: Math.round(totalBeforeDividend) ,
+                total: Math.round(total),
+                dividends: Math.round(dividends),
+                dividendsYield: Math.round(dividendsYield),
+                annualYield: Math.round((total * annualReturn))
+            });
+        }
+        
+        return projection;
+    },
+    
+    updateChart() {
+        if(this.chart) this.chart.destroy();
+        
+        const ctx = document.getElementById('chart').getContext('2d');
+        this.chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: this.projection.map(p => `السنة ${p.year}`),
+                datasets: [
+                    {
+                        label: 'القيمة الإجمالية بعد التوزيعات إن وجدت',
+                        data: this.projection.map(p => p.total),
+                        borderColor: '#3B82F6',
+                        tension: 0.2,
+                        borderWidth: 2
+                    },
+                    {
+                        label: ' القيمة الإجمالية قبل التوزيعات إن وجدت',
+                        data: this.projection.map(p => p.totalBeforeDividend),
+                        borderColor: '#4e84debf',
+                        tension: 0.2,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'العائد السنوي',
+                        data: this.projection.map(p => p.annualYield),
+                        borderColor: '#F59E0B',
+                        tension: 0.2,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'توزيعات الأرباح',
+                        data: this.projection.map(p => p.dividendsYield),
+                        borderColor: '#10B981',
+                        tension: 0.2,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'إدخار فقط',
+                        data: this.projectionWithoutReinvest.map(p => p.totalSavings),
+                        borderColor: '#EF4444',
+                        borderDash: [5, 5],
+                        tension: 0.2,
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                animation: {
+                    duration: 1000,
+                    easing: 'easeOutQuart'
+                },
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: (value) => value.toLocaleString() + ' ر.س'
+                        }
+                    }
+                }
+            }
+        });
+    },
+    
+    async calculateTarget() {
+        this.loading = true;
+        this.yearsToTarget = null;
+        
+        let years = 0;
+        let total = Number(this.initialAmount);
+        const monthly = Number(this.monthlyAmount);
+        const annualReturn = Number(this.annualReturn) / 100;
+        const dividendYield = Number(this.dividendYield) / 100;
+        const dividendes = Number(this.dividendYield);
+        const target = Number(this.targetMonthly) * 12;
+        
+        while(years < 50) {
+            years++;
+            
+            for(let month = 1; month <= 12; month++) {
+                total += monthly;
+                total *= 1 + (annualReturn / 12);
+            }
+            
+            const dividends = total * dividendYield;
+            
+            if(this.reinvestDividends) {
+                total += dividends * (this.reinvestPercentage / 100);
+            }
+            
+            if(dividends >= target) {
+                this.yearsToTarget = years;
+                break;
+            }
+        }
+        
+        this.loading = false;
+    }
+}" x-cloak>
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">حاسبة الاستثمار المتقدمة</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Inputs Section -->
+            <div class="bg-white p-6 rounded-lg shadow-sm space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">العوائد السنوية (%)</label>
+                    <input type="number" x-model="annualReturn" class="w-full p-2 border rounded-md transition-all duration-300">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">توزيعات الأرباح (%)</label>
+                    <input type="number" x-model="dividendYield" class="w-full p-2 border rounded-md transition-all duration-300">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">المبلغ الشهري (ر.س)</label>
+                    <input type="number" x-model="monthlyAmount" class="w-full p-2 border rounded-md transition-all duration-300">
+                </div>
+                <button 
+                    @click="updateChart()" 
+                    class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors duration-300">
+                    تحديث الحسابات
+                </button>
+            </div>
+
+            <!-- Reinvestment Section -->
+            <div class="bg-white p-6 rounded-lg shadow-sm space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">عدد سنوات العرض</label>
+                    <input type="number" x-model="years" min="1" max="50" class="w-full p-2 border rounded-md transition-all duration-300">
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" x-model="reinvestDividends" id="reinvest" class="w-4 h-4">
+                    <label for="reinvest" class="text-sm">إعادة استثمار الأرباح</label>
+                </div>
+                <div x-show="reinvestDividends" x-collapse.duration.250ms x-transition:enter="fade-enter" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+                    <label class="block text-sm font-medium mb-2">نسبة إعادة الاستثمار (%)</label>
+                    <input type="number" x-model="reinvestPercentage" class="w-full p-2 border rounded-md transition-all duration-300">
+                </div>
+            </div>
+
+            <!-- Target Section -->
+            <div class="bg-white p-6 rounded-lg shadow-sm space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">المبلغ الشهري المستهدف (ر.س)</label>
+                    <input type="number" x-model="targetMonthly" class="w-full p-2 border rounded-md transition-all duration-300">
+                </div>
+                <button 
+                    @click="calculateTarget()" 
+                    class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-300"
+                    :disabled="loading">
+                    <span x-show="!loading">احسب المدة المطلوبة</span>
+                    <span x-show="loading">جاري الحساب...</span>
+                </button>
+                <div x-collapse.duration.250ms x-show="yearsToTarget !== null" class="p-4 bg-green-50 rounded-md" x-transition:enter="fade-enter" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+                    <p class="text-green-700">
+                        ستصل للهدف خلال 
+                        <span x-text="yearsToTarget" class="font-bold"></span> سنة
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="bg-white p-6 rounded-lg shadow-sm mb-8" x-transition:enter="fade-enter">
+            <canvas id="chart"></canvas>
+        </div>
+
+        <!-- Table Section -->
+        <div class="bg-white p-6 rounded-lg shadow-sm mb-8 overflow-x-auto">
+            <h2 class="text-xl font-semibold mb-4">التقرير السنوي</h2>
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-right">السنة</th>
+                        <th class="px-4 py-2 text-right">الإدخار فقط</th>
+                        <th class="px-4 py-2 text-right">القيمة الإجمالية قبل التوزيعات</th>
+                        <th class="px-4 py-2 text-right">التوزيعات المتراكمة</th>
+                        <th class="px-4 py-2 text-right">العائد السنوي</th>
+                        <th class="px-4 py-2 text-right">القيمة الإجمالية</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="item in projection" :key="item.year">
+                        <tr class="border-t hover:bg-gray-50" x-transition:enter="fade-enter">
+                            <td class="px-4 py-2" x-text="item.year"></td>
+                            <td class="px-4 py-2" x-text="item.totalSavings.toLocaleString() + ' ر.س'"></td>
+                            <td class="px-4 py-2" x-text="item.totalBeforeDividend.toLocaleString() + ' ر.س'"></td>
+                            <td class="px-4 py-2" x-text="item.dividendsYield.toLocaleString() + ' ر.س'"></td>
+                            <td class="px-4 py-2" x-text="item.annualYield.toLocaleString() + ' ر.س'"></td>
+                            <td class="px-4 py-2" x-text="(item.annualYield+ item.dividendsYield + item.totalBeforeDividend ).toLocaleString() + ' ر.س'"></td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Explanation Section -->
+        <div class="bg-white p-6 rounded-lg shadow-sm" x-transition:enter="fade-enter">
+            <h2 class="text-xl font-semibold mb-4">كيف تعمل الحاسبة؟</h2>
+            <div class="space-y-3 text-gray-600">
+                <p>• العائد السنوي: يمثل أرباح الاستثمار السنوية قبل خصم التوزيعات</p>
+                <p>• يتم حساب الفوائد المركبة بشكل شهري</p>
+                <p>• عند تفعيل إعادة الاستثمار: يتم إضافة النسبة المحددة من التوزيعات إلى رأس المال</p>
+                <p>• المدة المطلوبة: عدد السنوات اللازمة لتصبح توزيعات الأرباح السنوية تعادل 12 ضعف المبلغ الشهري المستهدف</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
