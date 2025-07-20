@@ -21,7 +21,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100" x-data="{
+<body class="bg-gray-900 text-gray-100" x-data="{
     annualReturn: 8,
     dividendYield: 3,
     initialAmount: 0,
@@ -194,61 +194,61 @@
     }
 }" x-cloak>
     <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">حاسبة الاستثمار المتقدمة</h1>
+        <h1 class="text-3xl font-bold text-gray-100 mb-8 text-center">حاسبة الاستثمار المتقدمة</h1>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <!-- Inputs Section -->
-            <div class="bg-white p-6 rounded-lg shadow-sm space-y-4">
+            <div class="bg-gray-800 p-6 rounded-lg shadow-sm space-y-4">
                 <div>
-                    <label class="block text-sm font-medium mb-2">العوائد السنوية (%)</label>
-                    <input type="number" x-model="annualReturn" class="w-full p-2 border rounded-md transition-all duration-300">
+                    <label class="block text-sm font-medium mb-2 text-gray-300">العوائد السنوية (%)</label>
+                    <input type="number" x-model="annualReturn" class="w-full p-2 border rounded-md bg-gray-900 text-gray-100 border-gray-700 transition-all duration-300">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-2">توزيعات الأرباح (%)</label>
-                    <input type="number" x-model="dividendYield" class="w-full p-2 border rounded-md transition-all duration-300">
+                    <label class="block text-sm font-medium mb-2 text-gray-300">توزيعات الأرباح (%)</label>
+                    <input type="number" x-model="dividendYield" class="w-full p-2 border rounded-md bg-gray-900 text-gray-100 border-gray-700 transition-all duration-300">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-2">المبلغ الشهري (ر.س)</label>
-                    <input type="number" x-model="monthlyAmount" class="w-full p-2 border rounded-md transition-all duration-300">
+                    <label class="block text-sm font-medium mb-2 text-gray-300">المبلغ الشهري (ر.س)</label>
+                    <input type="number" x-model="monthlyAmount" class="w-full p-2 border rounded-md bg-gray-900 text-gray-100 border-gray-700 transition-all duration-300">
                 </div>
                 <button 
                     @click="updateChart()" 
-                    class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors duration-300">
+                    class="w-full bg-green-700 text-white py-2 px-4 rounded-md hover:bg-green-800 transition-colors duration-300">
                     تحديث الحسابات
                 </button>
             </div>
 
             <!-- Reinvestment Section -->
-            <div class="bg-white p-6 rounded-lg shadow-sm space-y-4">
+            <div class="bg-gray-800 p-6 rounded-lg shadow-sm space-y-4">
                 <div>
-                    <label class="block text-sm font-medium mb-2">عدد سنوات العرض</label>
-                    <input type="number" x-model="years" min="1" max="50" class="w-full p-2 border rounded-md transition-all duration-300">
+                    <label class="block text-sm font-medium mb-2 text-gray-300">عدد سنوات العرض</label>
+                    <input type="number" x-model="years" min="1" max="50" class="w-full p-2 border rounded-md bg-gray-900 text-gray-100 border-gray-700 transition-all duration-300">
                 </div>
                 <div class="flex items-center gap-2">
-                    <input type="checkbox" x-model="reinvestDividends" id="reinvest" class="w-4 h-4">
-                    <label for="reinvest" class="text-sm">إعادة استثمار الأرباح</label>
+                    <input type="checkbox" x-model="reinvestDividends" id="reinvest" class="w-4 h-4 accent-green-700">
+                    <label for="reinvest" class="text-sm text-gray-300">إعادة استثمار الأرباح</label>
                 </div>
                 <div x-show="reinvestDividends" x-collapse.duration.250ms x-transition:enter="fade-enter" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-                    <label class="block text-sm font-medium mb-2">نسبة إعادة الاستثمار (%)</label>
-                    <input type="number" x-model="reinvestPercentage" class="w-full p-2 border rounded-md transition-all duration-300">
+                    <label class="block text-sm font-medium mb-2 text-gray-300">نسبة إعادة الاستثمار (%)</label>
+                    <input type="number" x-model="reinvestPercentage" class="w-full p-2 border rounded-md bg-gray-900 text-gray-100 border-gray-700 transition-all duration-300">
                 </div>
             </div>
 
             <!-- Target Section -->
-            <div class="bg-white p-6 rounded-lg shadow-sm space-y-4">
+            <div class="bg-gray-800 p-6 rounded-lg shadow-sm space-y-4">
                 <div>
-                    <label class="block text-sm font-medium mb-2">المبلغ الشهري المستهدف (ر.س)</label>
-                    <input type="number" x-model="targetMonthly" class="w-full p-2 border rounded-md transition-all duration-300">
+                    <label class="block text-sm font-medium mb-2 text-gray-300">المبلغ الشهري المستهدف (ر.س)</label>
+                    <input type="number" x-model="targetMonthly" class="w-full p-2 border rounded-md bg-gray-900 text-gray-100 border-gray-700 transition-all duration-300">
                 </div>
                 <button 
                     @click="calculateTarget()" 
-                    class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-300"
+                    class="w-full bg-blue-700 text-white py-2 px-4 rounded-md hover:bg-blue-800 transition-colors duration-300"
                     :disabled="loading">
                     <span x-show="!loading">احسب المدة المطلوبة</span>
                     <span x-show="loading">جاري الحساب...</span>
                 </button>
-                <div x-collapse.duration.250ms x-show="yearsToTarget !== null" class="p-4 bg-green-50 rounded-md" x-transition:enter="fade-enter" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-                    <p class="text-green-700">
+                <div x-collapse.duration.250ms x-show="yearsToTarget !== null" class="p-4 bg-green-900 rounded-md" x-transition:enter="fade-enter" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+                    <p class="text-green-300">
                         ستصل للهدف خلال 
                         <span x-text="yearsToTarget" class="font-bold"></span> سنة
                     </p>
@@ -257,27 +257,27 @@
         </div>
 
         <!-- Chart Section -->
-        <div class="bg-white p-6 rounded-lg shadow-sm mb-8" x-transition:enter="fade-enter">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-sm mb-8" x-transition:enter="fade-enter">
             <canvas id="chart"></canvas>
         </div>
 
         <!-- Table Section -->
-        <div class="bg-white p-6 rounded-lg shadow-sm mb-8 overflow-x-auto">
-            <h2 class="text-xl font-semibold mb-4">التقرير السنوي</h2>
-            <table class="w-full">
-                <thead class="bg-gray-50">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-sm mb-8 overflow-x-auto">
+            <h2 class="text-xl font-semibold mb-4 text-gray-100">التقرير السنوي</h2>
+            <table class="w-full text-gray-100">
+                <thead class="bg-gray-700">
                     <tr>
-                        <th class="px-4 py-2 text-right">السنة</th>
-                        <th class="px-4 py-2 text-right">الإدخار فقط</th>
-                        <th class="px-4 py-2 text-right">القيمة الإجمالية قبل التوزيعات</th>
-                        <th class="px-4 py-2 text-right">التوزيعات المتراكمة</th>
-                        <th class="px-4 py-2 text-right">العائد السنوي</th>
-                        <th class="px-4 py-2 text-right">القيمة الإجمالية</th>
+                        <th class="px-4 py-2 text-right text-gray-300">السنة</th>
+                        <th class="px-4 py-2 text-right text-gray-300">الإدخار فقط</th>
+                        <th class="px-4 py-2 text-right text-gray-300">القيمة الإجمالية قبل التوزيعات</th>
+                        <th class="px-4 py-2 text-right text-gray-300">التوزيعات المتراكمة</th>
+                        <th class="px-4 py-2 text-right text-gray-300">العائد السنوي</th>
+                        <th class="px-4 py-2 text-right text-gray-300">القيمة الإجمالية</th>
                     </tr>
                 </thead>
                 <tbody>
                     <template x-for="item in projection" :key="item.year">
-                        <tr class="border-t hover:bg-gray-50" x-transition:enter="fade-enter">
+                        <tr class="border-t border-gray-700 hover:bg-gray-900" x-transition:enter="fade-enter">
                             <td class="px-4 py-2" x-text="item.year"></td>
                             <td class="px-4 py-2" x-text="item.totalSavings.toLocaleString() + ' ر.س'"></td>
                             <td class="px-4 py-2" x-text="item.totalBeforeDividend.toLocaleString() + ' ر.س'"></td>
@@ -291,9 +291,9 @@
         </div>
 
         <!-- Explanation Section -->
-        <div class="bg-white p-6 rounded-lg shadow-sm" x-transition:enter="fade-enter">
-            <h2 class="text-xl font-semibold mb-4">كيف تعمل الحاسبة؟</h2>
-            <div class="space-y-3 text-gray-600">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-sm" x-transition:enter="fade-enter">
+            <h2 class="text-xl font-semibold mb-4 text-gray-100">كيف تعمل الحاسبة؟</h2>
+            <div class="space-y-3 text-gray-300">
                 <p>• العائد السنوي: يمثل أرباح الاستثمار السنوية قبل خصم التوزيعات</p>
                 <p>• يتم حساب الفوائد المركبة بشكل شهري</p>
                 <p>• عند تفعيل إعادة الاستثمار: يتم إضافة النسبة المحددة من التوزيعات إلى رأس المال</p>
